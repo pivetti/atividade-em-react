@@ -1,8 +1,8 @@
 import { StatusBar } from 'expo-status-bar';
+import { Stack } from 'expo-router';
 import { StyleSheet } from 'react-native';
 import { MD3LightTheme, PaperProvider } from 'react-native-paper';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import Home from './src/pages/Home';
 
 const theme = {
   ...MD3LightTheme,
@@ -25,7 +25,7 @@ export default function App() {
       <PaperProvider theme={theme}>
         <SafeAreaView style={styles.container}>
           <StatusBar style="dark" />
-          <Home />
+          <Stack screenOptions={{ headerShown: false, contentStyle: styles.container }} />
         </SafeAreaView>
       </PaperProvider>
     </SafeAreaProvider>

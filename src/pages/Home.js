@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import { router } from 'expo-router';
 import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import BotaoCalcular from '../components/BotaoCalcular';
+import BotaoNavegacao from '../components/BotaoNavegacao';
 import Cabecalho from '../components/Cabecalho';
 import CampoNumerico from '../components/CampoNumerico';
 import ResultadoMargem from '../components/ResultadoMargem';
@@ -73,6 +75,7 @@ export default function Home() {
         keyboardDismissMode="on-drag"
       >
         <View style={styles.conteudo}>
+          <BotaoNavegacao titulo="Usuários" onPress={() => router.navigate('/usuarios')} />
           <Cabecalho />
           <CampoNumerico
             label="Preço de compra da soja"

@@ -1,8 +1,9 @@
 # Crush Margin
 
 Calculadora didática da margem de esmagamento da soja, feita em React Native,
-Expo 57 e JavaScript a partir do template blank existente. Uma única tela, com
-cálculo local e estado mantido com `useState`.
+Expo 57 e JavaScript a partir do template blank existente. A Aula Prática 1 traz
+o cálculo local com `useState`; a Aula Prática 2 acrescenta uma página de usuários
+fictícios consultados na DummyJSON. O visual continua simples.
 
 ## Executar com Expo Go
 
@@ -10,7 +11,7 @@ Na pasta do projeto, instale as dependências registradas no lockfile:
 
 ```sh
 npm ci
-npx expo start
+npx expo start --clear
 ```
 
 Use uma versão do Expo Go compatível com o SDK 57 e leia o QR code exibido no
@@ -29,20 +30,62 @@ Para abrir a versão web, use `npm run web`.
 
 ## Organização e componentes
 
-- `App.js`: tema claro com `PaperProvider`, `SafeAreaProvider`, `SafeAreaView` e barra de status.
+- `App.js`: tema claro, `PaperProvider`, área segura, barra de status e navegação com `Stack`.
+- `index.js`: entrada do Expo Router.
+- `src/app/`: layout e duas rotas que reutilizam as páginas de `src/pages/`.
 - `src/pages/Home.js`: campos, validação e controle do resultado com `useState`.
+- `src/pages/Usuarios.js`: consulta à API, estados de carregamento/erro e `FlatList`.
+- `src/components/CartaoUsuario.js`: `Card`, `Avatar.Image`, `Avatar.Text` e `Text` do Paper.
+- `src/components/BotaoNavegacao.js`: botão do Paper reutilizado para abrir usuários e voltar.
 - `src/components/Cabecalho.js`: título, subtítulo e premissas, usando `Text` do Paper.
 - `src/components/CampoNumerico.js`: `TextInput`, `Text` e `HelperText`, reutilizado nos quatro campos.
 - `src/components/BotaoCalcular.js`: botão do Paper que recebe a ação de cálculo.
 - `src/components/ResultadoMargem.js`: `Card` e `Text`, com uma linha de resultado reutilizada cinco vezes.
 - `src/utils/margem.js`: conversão numérica, rendimentos fixos e fórmulas.
 
-Os componentes próprios encapsulam cinco tipos de componentes do React Native
-Paper: `Text`, `TextInput`, `HelperText`, `Button` e `Card`. A estilização usa
-`StyleSheet.create`. A tela tem rolagem e tratamento básico do teclado.
+Os componentes próprios encapsulam `Text`, `TextInput`, `HelperText`, `Button`,
+`Card` e os avatares do React Native Paper. A página de usuários também usa
+`ActivityIndicator`. A estilização usa `StyleSheet.create`. A calculadora tem
+rolagem e tratamento básico do teclado; a lista de usuários tem sua própria rolagem.
 
 O PDF não está incluído no repositório. A implementação segue os requisitos
 transcritos no pedido da atividade.
+
+## Aula Prática 2: usuários
+
+Na calculadora, toque em **Usuários**. Use **Voltar à calculadora** para retornar
+com os campos e o resultado preservados. A navegação usa Expo Router, conforme
+o `AGENTS.md`, mantendo as páginas em JavaScript.
+
+A chamada real é `fetch('https://dummyjson.com/users')`, conforme a
+[documentação da DummyJSON](https://dummyjson.com/docs/users). A resposta é um
+objeto com `users`, `total`, `skip` e `limit`. A página mostra a lista padrão do
+endpoint (30 usuários na resposta conferida), sem paginação adicional.
+
+Cada cartão mostra foto, nome completo, e-mail e empresa. Fotos ausentes ou com
+falha são substituídas pelas iniciais. O ID é usado como chave da `FlatList`,
+que não está dentro de uma `ScrollView` vertical.
+
+O `useEffect` executa a consulta na montagem e quando o usuário solicita uma
+nova busca. `useState` guarda a lista, os estados de carregamento e a mensagem de
+erro. A resposta passa pela verificação de `response.ok`, do JSON, da lista e dos
+campos necessários, incluindo IDs sem repetição.
+
+Durante a primeira busca aparece o `ActivityIndicator`. Uma falha mostra uma
+mensagem e **Tentar novamente**; uma resposta vazia mostra **Nenhum usuário
+encontrado**. O `finally` encerra os indicadores tanto no sucesso quanto no erro.
+
+No celular, puxe a lista para atualizar usando `RefreshControl`. Se a atualização
+falhar, a lista anterior continua visível e é identificada como a última consulta
+bem-sucedida. No navegador, o React Native Web não implementa esse gesto.
+
+O `AbortController` cancela a consulta ao desmontar a página ou após 15 segundos
+de espera. Uma variável local impede atualizações de estado após a desmontagem.
+Não há cadastro, edição, exclusão, autenticação ou backend próprio.
+
+As dependências de navegação foram instaladas com `npx expo install`, preservando
+o SDK 57. Reanimated e Worklets, trazidos pela árvore do Router, foram alinhados
+às versões compatíveis com esse SDK.
 
 ## Cálculo e preenchimento
 
@@ -97,7 +140,13 @@ Verificado neste ambiente:
 - Lint, verificação estática do JavaScript e compatibilidade das dependências.
 - Expo Doctor: 21 de 21 verificações aprovadas.
 - Exportação dos bundles para Android, iOS e web.
+- Aula 2 no Chromium: consulta real à API, indicador inicial, dados dos cartões,
+  navegação e preservação do cálculo, sem consultas em loop.
+- Com respostas controladas apenas durante o teste: HTTP 503, erro de rede, JSON
+  e estrutura inválidos, lista vazia, nova tentativa e iniciais no lugar da foto.
+- Callback do `RefreshControl`: nova consulta, erro com preservação da lista e
+  recuperação. Cancelamento da requisição ao voltar durante uma busca.
 
 Não foi executado em aparelho físico ou emulador Android/iOS. O teclado nativo e
-a área segura ainda precisam de conferência no celular. A conexão por túnel não
-foi testada.
+a área segura ainda precisam de conferência no celular, assim como o gesto nativo
+de puxar para atualizar. A conexão por túnel não foi testada.
